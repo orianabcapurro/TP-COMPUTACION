@@ -1,0 +1,445 @@
+// ============================================================
+// IMA PICO GENERATIVE — Réplica con sistema de paletas
+// Processing Java Mode — TP Computación
+// ============================================================
+// Paso 1: Sistema de paletas en array. Todas las formas toman
+// su color de la paleta activa. Por ahora hay una sola paleta
+// (idéntica a la versión pixel-perfect anterior).
+// ============================================================
+
+final int LADO = 600;
+final int MARCO = 22;          // marco blanco exterior
+final float GRID = 500.0;      // grid virtual de referencia
+float s;                       // factor de escala grid → lienzo
+
+// --- SISTEMA DE PALETAS ---
+final int NUM_PALETAS = 4;
+final int COLORES_POR_PALETA = 14;
+color[][] paletas = new color[NUM_PALETAS][COLORES_POR_PALETA];
+int indicePaleta = 0;
+
+// --- INTENSIDAD ---
+float intensidad = 0.0;                  // rango [0.0, 1.0]
+final float PASO_INTENSIDAD = 0.05;
+// Grosor del borde blanco (en unidades de grid, se escalan con s)
+final float GROSOR_BORDE_MIN = 12.0;
+final float GROSOR_BORDE_MAX = 32.0;
+// Factores de amplitud de las formas orgánicas
+final float AMPL_ZIGZAG_MIN = 1.0;
+final float AMPL_ZIGZAG_MAX = 1.8;
+final float AMPL_ONDA_MIN   = 1.0;
+final float AMPL_ONDA_MAX   = 1.4;
+// Ejes de referencia para escalar las formas orgánicas
+final float ZIGZAG_EJE_X = -30;   // borde izquierdo de la forma zigzag
+final float ONDA_EJE_X   = 510;   // borde derecho de la forma onda
+// Factores de color (saturación/brillo)
+final float FACTOR_SAT_MIN = 0.85;
+final float FACTOR_SAT_MAX = 1.15;
+final float FACTOR_BR_MIN  = 0.95;
+final float FACTOR_BR_MAX  = 1.10;
+// Tamaño del motivo firma
+final float MOTIVO_LADO_MIN = 70;
+final float MOTIVO_LADO_MAX = 110;
+
+// Slots dentro de cada paleta (constantes para legibilidad)
+final int SLOT_FONDO          = 0;
+final int SLOT_ZIGZAG         = 1;
+final int SLOT_ONDA           = 2;
+final int SLOT_CUARTO_CIRCULO = 3;
+final int SLOT_BARRA_AMARILLA = 4;
+final int SLOT_RECT_AZUL      = 5;
+final int SLOT_TRIANGULO      = 6;
+final int SLOT_ARCADA         = 7;
+final int SLOT_CUADRADO_ROJO  = 8;
+final int SLOT_PILDORA        = 9;
+final int SLOT_MOTIVO_SUP     = 10;
+final int SLOT_MOTIVO_DER     = 11;
+final int SLOT_MOTIVO_INF     = 12;
+final int SLOT_MOTIVO_IZQ     = 13;
+
+// --- DEBUG ---
+boolean modoDebug = false;
+
+// ============================================================
+void setup() {
+  size(600, 600);
+  s = (LADO - 2 * MARCO) / GRID;
+  inicializarPaletas();
+  noLoop();
+}
+
+// ============================================================
+// INICIALIZACIÓN DE PALETAS
+// ============================================================
+void inicializarPaletas() {
+  // Paleta 0 — Verde bosque (réplica original)
+  paletas[0][SLOT_FONDO]          = #0C482E;
+  paletas[0][SLOT_ZIGZAG]         = #602143;
+  paletas[0][SLOT_ONDA]           = #88B914;
+  paletas[0][SLOT_CUARTO_CIRCULO] = #D63583;
+  paletas[0][SLOT_BARRA_AMARILLA] = #F0B000;
+  paletas[0][SLOT_RECT_AZUL]      = #1C3D92;
+  paletas[0][SLOT_TRIANGULO]      = #2FA7D1;
+  paletas[0][SLOT_ARCADA]         = #BA81B9;
+  paletas[0][SLOT_CUADRADO_ROJO]  = #D12731;
+  paletas[0][SLOT_PILDORA]        = #279E39;
+  paletas[0][SLOT_MOTIVO_SUP]     = #00A4B2;
+  paletas[0][SLOT_MOTIVO_DER]     = #1D1D1B;
+  paletas[0][SLOT_MOTIVO_INF]     = #FBDF15;
+  paletas[0][SLOT_MOTIVO_IZQ]     = #F15C29;
+  
+  // Paleta 1 — Violeta nocturno (fondo violeta oscuro, colores fríos)
+  paletas[1][SLOT_FONDO]          = #2B1A4C;
+  paletas[1][SLOT_ZIGZAG]         = #D63583;
+  paletas[1][SLOT_ONDA]           = #2FA7D1;
+  paletas[1][SLOT_CUARTO_CIRCULO] = #F0B000;
+  paletas[1][SLOT_BARRA_AMARILLA] = #88B914;
+  paletas[1][SLOT_RECT_AZUL]      = #00A4B2;
+  paletas[1][SLOT_TRIANGULO]      = #BA81B9;
+  paletas[1][SLOT_ARCADA]         = #F15C29;
+  paletas[1][SLOT_CUADRADO_ROJO]  = #1C3D92;
+  paletas[1][SLOT_PILDORA]        = #FBDF15;
+  paletas[1][SLOT_MOTIVO_SUP]     = #D12731;
+  paletas[1][SLOT_MOTIVO_DER]     = #1D1D1B;
+  paletas[1][SLOT_MOTIVO_INF]     = #88B914;
+  paletas[1][SLOT_MOTIVO_IZQ]     = #D63583;
+  
+  // Paleta 2 — Azul profundo (fondo azul medianoche, acentos cálidos)
+  paletas[2][SLOT_FONDO]          = #0F1E4D;
+  paletas[2][SLOT_ZIGZAG]         = #F15C29;
+  paletas[2][SLOT_ONDA]           = #FBDF15;
+  paletas[2][SLOT_CUARTO_CIRCULO] = #00A4B2;
+  paletas[2][SLOT_BARRA_AMARILLA] = #D63583;
+  paletas[2][SLOT_RECT_AZUL]      = #D12731;
+  paletas[2][SLOT_TRIANGULO]      = #F0B000;
+  paletas[2][SLOT_ARCADA]         = #88B914;
+  paletas[2][SLOT_CUADRADO_ROJO]  = #BA81B9;
+  paletas[2][SLOT_PILDORA]        = #2FA7D1;
+  paletas[2][SLOT_MOTIVO_SUP]     = #88B914;
+  paletas[2][SLOT_MOTIVO_DER]     = #1D1D1B;
+  paletas[2][SLOT_MOTIVO_INF]     = #D63583;
+  paletas[2][SLOT_MOTIVO_IZQ]     = #F0B000;
+  
+  // Paleta 3 — Verde alternativo (fondo verde oscuro, magentas/amarillos/azules)
+  paletas[3][SLOT_FONDO]          = #103A2E;
+  paletas[3][SLOT_ZIGZAG]         = #1C3D92;
+  paletas[3][SLOT_ONDA]           = #F0B000;
+  paletas[3][SLOT_CUARTO_CIRCULO] = #00A4B2;
+  paletas[3][SLOT_BARRA_AMARILLA] = #D63583;
+  paletas[3][SLOT_RECT_AZUL]      = #F15C29;
+  paletas[3][SLOT_TRIANGULO]      = #BA81B9;
+  paletas[3][SLOT_ARCADA]         = #FBDF15;
+  paletas[3][SLOT_CUADRADO_ROJO]  = #D63583;
+  paletas[3][SLOT_PILDORA]        = #88B914;
+  paletas[3][SLOT_MOTIVO_SUP]     = #D12731;
+  paletas[3][SLOT_MOTIVO_DER]     = #1D1D1B;
+  paletas[3][SLOT_MOTIVO_INF]     = #2FA7D1;
+  paletas[3][SLOT_MOTIVO_IZQ]     = #F0B000;
+}
+
+// Devuelve el color del slot en la paleta activa, ajustado por intensidad
+color colorDePaleta(int slot) {
+  return ajustarColor(paletas[indicePaleta][slot]);
+}
+
+// Grosor del borde blanco interpolado por intensidad (en unidades de grid)
+float grosorBordeBlanco() {
+  return lerp(GROSOR_BORDE_MIN, GROSOR_BORDE_MAX, intensidad);
+}
+
+// Amplitud de la forma zigzag (multiplicador aplicado al desplazamiento respecto del eje)
+float amplitudZigzag() {
+  return lerp(AMPL_ZIGZAG_MIN, AMPL_ZIGZAG_MAX, intensidad);
+}
+
+// Amplitud de la onda (multiplicador aplicado a los puntos de control bezier respecto del eje)
+float amplitudOnda() {
+  return lerp(AMPL_ONDA_MIN, AMPL_ONDA_MAX, intensidad);
+}
+
+// Lado actual del motivo firma
+float ladoMotivo() {
+  return lerp(MOTIVO_LADO_MIN, MOTIVO_LADO_MAX, intensidad);
+}
+
+// Escala una coordenada X respecto de un eje con un multiplicador.
+// ejemplo: amplificar((-30), (-30), 1.8) = -30 (el eje no se mueve)
+//          amplificar(125, -30, 1.8)     = -30 + (125 - -30) * 1.8 = 249
+float amplificar(float valor, float eje, float factor) {
+  return eje + (valor - eje) * factor;
+}
+
+// Aplica los factores de saturación y brillo a un color según la intensidad actual
+color ajustarColor(color c) {
+  float fSat = lerp(FACTOR_SAT_MIN, FACTOR_SAT_MAX, intensidad);
+  float fBr  = lerp(FACTOR_BR_MIN,  FACTOR_BR_MAX,  intensidad);
+  // pushStyle/colorMode para leer y construir en HSB con rangos nítidos
+  pushStyle();
+  colorMode(HSB, 360, 100, 100);
+  float h  = hue(c);
+  float sa = constrain(saturation(c) * fSat, 0, 100);
+  float br = constrain(brightness(c)  * fBr,  0, 100);
+  color resultado = color(h, sa, br);
+  popStyle();
+  return resultado;
+}
+
+// ============================================================
+void draw() {
+  // Marco blanco exterior
+  background(255);
+  
+  pushMatrix();
+  translate(MARCO, MARCO);
+  
+  // Fondo del área interior
+  noStroke();
+  fill(colorDePaleta(SLOT_FONDO));
+  rect(0, 0, GRID * s, GRID * s);
+  
+  // Clip al área interior
+  clip(0, 0, (int)(GRID * s), (int)(GRID * s));
+  
+  dibujarFormaZigzag();
+  dibujarFormaOnda();
+  dibujarCuartoCirculoRosa();
+  dibujarBarraAmarilla();
+  dibujarRectanguloAzul();
+  dibujarTrianguloCeleste();
+  dibujarArcadaLavanda();
+  dibujarCuadradoRojo();
+  dibujarPildoraVerde();
+  dibujarMotivoInferiorDerecho();
+  
+  noClip();
+  popMatrix();
+  
+  if (modoDebug) dibujarDebug();
+}
+
+// ============================================================
+// 1. Forma zigzag con borde blanco
+//    Los dientes se amplifican horizontalmente según intensidad,
+//    manteniendo fijo el eje izquierdo (pegado al borde del lienzo).
+// ============================================================
+void dibujarFormaZigzag() {
+  float[][] zz = {
+    {-30, 250}, {125, 365}, {40, 430}, {210, 530}
+  };
+  float a = amplitudZigzag();
+  
+  // Calculamos los puntos amplificados una sola vez
+  float[][] p = new float[zz.length][2];
+  for (int i = 0; i < zz.length; i++) {
+    p[i][0] = amplificar(zz[i][0], ZIGZAG_EJE_X, a);
+    p[i][1] = zz[i][1];
+  }
+  
+  // Relleno
+  fill(colorDePaleta(SLOT_ZIGZAG));
+  noStroke();
+  beginShape();
+  for (int i = 0; i < p.length; i++) {
+    vertex(p[i][0] * s, p[i][1] * s);
+  }
+  vertex(ZIGZAG_EJE_X * s, 530 * s);
+  endShape(CLOSE);
+  
+  // Trazo blanco zigzag
+  stroke(#FBFCFC);
+  strokeWeight(grosorBordeBlanco() * s);
+  noFill();
+  strokeCap(SQUARE);
+  strokeJoin(MITER);
+  beginShape();
+  for (int i = 0; i < p.length; i++) {
+    vertex(p[i][0] * s, p[i][1] * s);
+  }
+  endShape();
+  noStroke();
+}
+
+// ============================================================
+// 2. Forma onda con borde blanco
+//    Las ondas se amplifican horizontalmente según intensidad,
+//    manteniendo fijo el eje derecho (pegado al borde del lienzo).
+// ============================================================
+void dibujarFormaOnda() {
+  float a = amplitudOnda();
+  // Puntos originales (del ejemplo de referencia)
+  // Los anclajes (extremos de cada bezier) y los controles se amplifican
+  // respecto del eje derecho (x=510)
+  float ax0 = amplificar(335, ONDA_EJE_X, a);
+  float ax1 = amplificar(450, ONDA_EJE_X, a);
+  float ax2 = amplificar(335, ONDA_EJE_X, a);
+  float ax3 = amplificar(220, ONDA_EJE_X, a);
+  float ax4 = amplificar(530, ONDA_EJE_X, a); // control fuera del lienzo
+  float ax5 = amplificar(455, ONDA_EJE_X, a);
+  float ax6 = amplificar(350, ONDA_EJE_X, a);
+  float ax7 = amplificar(490, ONDA_EJE_X, a);
+  float ax8 = amplificar(510, ONDA_EJE_X, a); // el eje mismo, no se mueve
+  
+  // Relleno
+  fill(colorDePaleta(SLOT_ONDA));
+  noStroke();
+  beginShape();
+  vertex(ax0 * s, -10 * s);
+  bezierVertex(ax1 * s,  45 * s, ax1 * s,  65 * s, ax2 * s, 115 * s);
+  bezierVertex(ax3 * s, 160 * s, ax4 * s, 175 * s, ax5 * s, 255 * s);
+  bezierVertex(ax6 * s, 330 * s, ax7 * s, 370 * s, ax8 * s, 400 * s);
+  vertex(ONDA_EJE_X * s, -10 * s);
+  endShape(CLOSE);
+  
+  // Trazo blanco ondulado
+  stroke(#FBFCFC);
+  strokeWeight(grosorBordeBlanco() * s);
+  noFill();
+  strokeCap(SQUARE);
+  strokeJoin(ROUND);
+  beginShape();
+  vertex(ax0 * s, -10 * s);
+  bezierVertex(ax1 * s,  45 * s, ax1 * s,  65 * s, ax2 * s, 115 * s);
+  bezierVertex(ax3 * s, 160 * s, ax4 * s, 175 * s, ax5 * s, 255 * s);
+  bezierVertex(ax6 * s, 330 * s, ax7 * s, 370 * s, ax8 * s, 400 * s);
+  endShape();
+  noStroke();
+}
+
+// ============================================================
+// 3. Cuarto de círculo rosa
+// ============================================================
+void dibujarCuartoCirculoRosa() {
+  fill(colorDePaleta(SLOT_CUARTO_CIRCULO));
+  noStroke();
+  arc(0, 0, 210 * s, 210 * s, 0, HALF_PI);
+}
+
+// ============================================================
+// 4. Barra amarilla
+// ============================================================
+void dibujarBarraAmarilla() {
+  fill(colorDePaleta(SLOT_BARRA_AMARILLA));
+  noStroke();
+  rect(0, 142 * s, 85 * s, 35 * s);
+}
+
+// ============================================================
+// 5. Rectángulo azul oscuro
+// ============================================================
+void dibujarRectanguloAzul() {
+  fill(colorDePaleta(SLOT_RECT_AZUL));
+  noStroke();
+  rect(105 * s, 0, 190 * s, 95 * s);
+}
+
+// ============================================================
+// 6. Triángulo celeste
+// ============================================================
+void dibujarTrianguloCeleste() {
+  fill(colorDePaleta(SLOT_TRIANGULO));
+  noStroke();
+  triangle(105 * s, 95 * s, 295 * s, 95 * s, 200 * s, 250 * s);
+}
+
+// ============================================================
+// 7. Arcada lavanda
+// ============================================================
+void dibujarArcadaLavanda() {
+  fill(colorDePaleta(SLOT_ARCADA));
+  noStroke();
+  arc(330 * s, 350 * s, 185 * s, 185 * s, PI, TWO_PI);
+  rect(237 * s, 350 * s, 185 * s, 50 * s);
+}
+
+// ============================================================
+// 8. Cuadrado rojo
+// ============================================================
+void dibujarCuadradoRojo() {
+  fill(colorDePaleta(SLOT_CUADRADO_ROJO));
+  noStroke();
+  rect(270 * s, 400 * s, 152 * s, 100 * s);
+}
+
+// ============================================================
+// 9. Píldora verde
+// ============================================================
+void dibujarPildoraVerde() {
+  fill(colorDePaleta(SLOT_PILDORA));
+  noStroke();
+  rect(205 * s, 375 * s, 75 * s, 75 * s, 35 * s);
+}
+
+// ============================================================
+// 10. Motivo firma: cuadrado dividido en 4 triángulos por diagonales
+//     Tamaño modulado por intensidad.
+// ============================================================
+void dibujarMotivoInferiorDerecho() {
+  noStroke();
+  
+  float lado = ladoMotivo();
+  float cx = 500 - lado / 2.0;
+  float cy = 500 - lado / 2.0;
+  float half = lado / 2.0;
+  
+  float x1 = (cx - half) * s;
+  float y1 = (cy - half) * s;
+  float x2 = (cx + half) * s;
+  float y2 = (cy + half) * s;
+  float mx = cx * s;
+  float my = cy * s;
+  
+  fill(colorDePaleta(SLOT_MOTIVO_SUP));
+  triangle(x1, y1, x2, y1, mx, my);
+  
+  fill(colorDePaleta(SLOT_MOTIVO_DER));
+  triangle(x2, y1, x2, y2, mx, my);
+  
+  fill(colorDePaleta(SLOT_MOTIVO_INF));
+  triangle(x2, y2, x1, y2, mx, my);
+  
+  fill(colorDePaleta(SLOT_MOTIVO_IZQ));
+  triangle(x1, y2, x1, y1, mx, my);
+}
+
+// ============================================================
+// CONTROLES
+// ============================================================
+void keyPressed() {
+  if (key == ' ') {
+    indicePaleta = (indicePaleta + 1) % NUM_PALETAS;
+    redraw();
+  }
+  if (key == '+' || key == '=' || keyCode == UP) {
+    intensidad = min(1.0, intensidad + PASO_INTENSIDAD);
+    redraw();
+  }
+  if (key == '-' || keyCode == DOWN) {
+    intensidad = max(0.0, intensidad - PASO_INTENSIDAD);
+    redraw();
+  }
+  if (key == 'd' || key == 'D') {
+    modoDebug = !modoDebug;
+    redraw();
+  }
+  if (key == 'r' || key == 'R') {
+    redraw();
+  }
+}
+
+void dibujarDebug() {
+  noStroke();
+  fill(0, 0, 0, 180);
+  rect(10, 10, 300, 170);
+  fill(255);
+  textSize(13);
+  textAlign(LEFT, TOP);
+  text("=== DEBUG ===", 20, 18);
+  text("Paleta: " + indicePaleta + " / " + (NUM_PALETAS - 1), 20, 36);
+  text("Intensidad: " + nf(intensidad, 1, 2), 20, 54);
+  text("Grosor borde: " + nf(grosorBordeBlanco(), 1, 1), 20, 72);
+  text("Ampl zigzag: " + nf(amplitudZigzag(), 1, 2) + "x", 20, 90);
+  text("Ampl onda:   " + nf(amplitudOnda(), 1, 2) + "x", 20, 108);
+  text("Lado motivo: " + nf(ladoMotivo(), 1, 1), 20, 126);
+  text("UP/DOWN=intensidad  SPACE=paleta", 20, 148);
+  text("D=toggle debug", 20, 164);
+}

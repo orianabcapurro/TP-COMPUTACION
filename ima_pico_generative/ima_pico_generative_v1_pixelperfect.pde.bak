@@ -1,0 +1,250 @@
+// ============================================================
+// IMA PICO GENERATIVE — Réplica pixel-perfect
+// Processing Java Mode — TP Computación
+// ============================================================
+// Versión estática (sin aleatorización) que replica la pintura
+// de referencia. Todas las coordenadas están en un grid virtual
+// de 500×500 y se escalan al tamaño real del lienzo.
+// ============================================================
+
+final int LADO = 600;
+final int MARCO = 22;          // marco blanco exterior
+final float GRID = 500.0;      // grid virtual de referencia
+float s;                       // factor de escala grid → lienzo
+
+// --- DEBUG ---
+boolean modoDebug = false;
+
+void setup() {
+  size(600, 600);
+  // Factor de escala: el grid 500 se mapea al área interior (LADO - 2*MARCO)
+  s = (LADO - 2 * MARCO) / GRID;
+  noLoop();
+}
+
+void draw() {
+  // 1. Marco blanco exterior
+  background(255);
+  
+  // 2. Trasladar al área interior y aplicar fondo verde oscuro
+  pushMatrix();
+  translate(MARCO, MARCO);
+  
+  noStroke();
+  fill(#0C482E);
+  rect(0, 0, GRID * s, GRID * s);
+  
+  // 3. Clip al área interior para que nada se salga
+  clip(0, 0, (int)(GRID * s), (int)(GRID * s));
+  
+  dibujarFormaMaroonZigzag();
+  dibujarFormaVerdeLimaOnda();
+  dibujarCuartoCirculoRosa();
+  dibujarBarraAmarilla();
+  dibujarRectanguloAzul();
+  dibujarTrianguloCeleste();
+  dibujarArcadaLavanda();
+  dibujarCuadradoRojo();
+  dibujarPildoraVerde();
+  dibujarMotivoInferiorDerecho();
+  
+  noClip();
+  popMatrix();
+  
+  if (modoDebug) dibujarDebug();
+}
+
+// ============================================================
+// 1. Forma marrón (vino) con borde zigzag blanco
+//    Esquina inferior-izquierda
+// ============================================================
+void dibujarFormaMaroonZigzag() {
+  float[][] zz = {
+    {-30, 250}, {125, 365}, {40, 430}, {210, 530}
+  };
+  
+  // Relleno marrón
+  fill(#602143);
+  noStroke();
+  beginShape();
+  vertex(zz[0][0] * s, zz[0][1] * s);
+  vertex(zz[1][0] * s, zz[1][1] * s);
+  vertex(zz[2][0] * s, zz[2][1] * s);
+  vertex(zz[3][0] * s, zz[3][1] * s);
+  vertex(-30 * s, 530 * s);
+  endShape(CLOSE);
+  
+  // Trazo blanco zigzag (alineado al borde)
+  stroke(#FBFCFC);
+  strokeWeight(18 * s);
+  noFill();
+  strokeCap(SQUARE);
+  strokeJoin(MITER);
+  beginShape();
+  for (int i = 0; i < zz.length; i++) {
+    vertex(zz[i][0] * s, zz[i][1] * s);
+  }
+  endShape();
+  noStroke();
+}
+
+// ============================================================
+// 2. Forma verde lima con borde ondulado blanco
+//    Esquina superior-derecha
+// ============================================================
+void dibujarFormaVerdeLimaOnda() {
+  // Relleno verde lima
+  fill(#88B914);
+  noStroke();
+  beginShape();
+  vertex(335 * s, -10 * s);
+  bezierVertex(450 * s,  45 * s, 450 * s,  65 * s, 335 * s, 115 * s);
+  bezierVertex(220 * s, 160 * s, 530 * s, 175 * s, 455 * s, 255 * s);
+  bezierVertex(350 * s, 330 * s, 490 * s, 370 * s, 510 * s, 400 * s);
+  vertex(510 * s, -10 * s);
+  endShape(CLOSE);
+  
+  // Trazo blanco ondulado (alineado al borde)
+  stroke(#FBFCFC);
+  strokeWeight(18 * s);
+  noFill();
+  strokeCap(SQUARE);
+  strokeJoin(ROUND);
+  beginShape();
+  vertex(335 * s, -10 * s);
+  bezierVertex(450 * s,  45 * s, 450 * s,  65 * s, 335 * s, 115 * s);
+  bezierVertex(220 * s, 160 * s, 530 * s, 175 * s, 455 * s, 255 * s);
+  bezierVertex(350 * s, 330 * s, 490 * s, 370 * s, 510 * s, 400 * s);
+  endShape();
+  noStroke();
+}
+
+// ============================================================
+// 3. Cuarto de círculo rosa (esquina superior-izquierda)
+// ============================================================
+void dibujarCuartoCirculoRosa() {
+  fill(#D63583);
+  noStroke();
+  // arc(cx, cy, w, h, start, stop) — centro en (0,0), diámetro 210
+  arc(0, 0, 210 * s, 210 * s, 0, HALF_PI);
+}
+
+// ============================================================
+// 4. Barra amarilla pegada al borde izquierdo
+// ============================================================
+void dibujarBarraAmarilla() {
+  fill(#F0B000);
+  noStroke();
+  rect(0, 142 * s, 85 * s, 35 * s);
+}
+
+// ============================================================
+// 5. Rectángulo azul oscuro pegado arriba
+// ============================================================
+void dibujarRectanguloAzul() {
+  fill(#1C3D92);
+  noStroke();
+  rect(105 * s, 0, 190 * s, 95 * s);
+}
+
+// ============================================================
+// 6. Triángulo celeste (punta hacia abajo)
+// ============================================================
+void dibujarTrianguloCeleste() {
+  fill(#2FA7D1);
+  noStroke();
+  triangle(105 * s, 95 * s, 295 * s, 95 * s, 200 * s, 250 * s);
+}
+
+// ============================================================
+// 7. Arcada lavanda (semicírculo + rectángulo)
+// ============================================================
+void dibujarArcadaLavanda() {
+  fill(#BA81B9);
+  noStroke();
+  // Semicírculo superior (cúpula)
+  arc(330 * s, 350 * s, 185 * s, 185 * s, PI, TWO_PI);
+  // Rectángulo debajo
+  rect(237 * s, 350 * s, 185 * s, 50 * s);
+}
+
+// ============================================================
+// 8. Cuadrado rojo pegado al borde inferior
+// ============================================================
+void dibujarCuadradoRojo() {
+  fill(#D12731);
+  noStroke();
+  rect(270 * s, 400 * s, 152 * s, 100 * s);
+}
+
+// ============================================================
+// 9. Píldora verde pequeña
+// ============================================================
+void dibujarPildoraVerde() {
+  fill(#279E39);
+  noStroke();
+  rect(205 * s, 375 * s, 75 * s, 75 * s, 35 * s);
+}
+
+// ============================================================
+// 10. Motivo firma: cuadrado dividido en 4 triángulos por diagonales
+//     Ubicado en la esquina inferior-derecha, parcialmente cortado
+// ============================================================
+void dibujarMotivoInferiorDerecho() {
+  noStroke();
+  
+  // Cuadrado en la esquina inferior-derecha del área interior.
+  // Completo, apoyado contra los bordes inferior y derecho.
+  float lado = 80;               // tamaño del cuadrado
+  float cx = 500 - lado / 2.0;   // centro tocando el borde derecho
+  float cy = 500 - lado / 2.0;   // centro tocando el borde inferior
+  float half = lado / 2.0;
+  
+  float x1 = (cx - half) * s;
+  float y1 = (cy - half) * s;
+  float x2 = (cx + half) * s;
+  float y2 = (cy + half) * s;
+  float mx = cx * s;
+  float my = cy * s;
+  
+  // Triángulo superior (cian)
+  fill(#00A4B2);
+  triangle(x1, y1, x2, y1, mx, my);
+  
+  // Triángulo derecho (negro)
+  fill(#1D1D1B);
+  triangle(x2, y1, x2, y2, mx, my);
+  
+  // Triángulo inferior (amarillo)
+  fill(#FBDF15);
+  triangle(x2, y2, x1, y2, mx, my);
+  
+  // Triángulo izquierdo (naranja)
+  fill(#F15C29);
+  triangle(x1, y2, x1, y1, mx, my);
+}
+
+// ============================================================
+// CONTROLES
+// ============================================================
+void keyPressed() {
+  if (key == 'd' || key == 'D') {
+    modoDebug = !modoDebug;
+    redraw();
+  }
+  if (key == 'r' || key == 'R') {
+    redraw();
+  }
+}
+
+void dibujarDebug() {
+  noStroke();
+  fill(0, 0, 0, 180);
+  rect(10, 10, 280, 80);
+  fill(255);
+  textSize(13);
+  textAlign(LEFT, TOP);
+  text("=== DEBUG ===", 20, 18);
+  text("Replica estatica de referencia", 20, 36);
+  text("D=toggle debug  R=redraw", 20, 58);
+}
