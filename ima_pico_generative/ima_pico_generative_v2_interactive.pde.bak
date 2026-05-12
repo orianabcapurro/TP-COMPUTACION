@@ -1,12 +1,3 @@
-// ============================================================
-// IMA PICO GENERATIVE — Réplica con sistema de paletas
-// Processing Java Mode — TP Computación
-// ============================================================
-// Paso 1: Sistema de paletas en array. Todas las formas toman
-// su color de la paleta activa. Por ahora hay una sola paleta
-// (idéntica a la versión pixel-perfect anterior).
-// ============================================================
-
 final int LADO = 600;
 final int MARCO = 22;          // marco blanco exterior
 final float GRID = 500.0;      // grid virtual de referencia
