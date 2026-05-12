@@ -1,7 +1,3 @@
-// ============================================================
-// IMA PICO GENERATIVE — Réplica con paletas, intensidad y mutación
-// Processing Java Mode — TP Computación
-// ============================================================
 // Controles:
 //   UP/DOWN o +/-  →  intensidad [0,1]
 //   SPACE          →  ciclar paleta
