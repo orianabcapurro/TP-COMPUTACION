@@ -1,15 +1,9 @@
-// ============================================================
-// IMA PICO GENERATIVE — Port a p5.js (para GitHub Pages)
-// Replica la lógica del sketch de Processing Java Mode.
-// Fuente oficial: ima_pico_generative/ima_pico_generative.pde
-// ============================================================
-
 const LADO = 600;
 const MARCO = 22;
 const GRID = 500.0;
 let s;
 
-// --- PALETAS ---
+// PALETAS
 const NUM_PALETAS = 4;
 const COLORES_POR_PALETA = 14;
 const paletas = Array.from({ length: NUM_PALETAS }, () => new Array(COLORES_POR_PALETA));
@@ -31,7 +25,7 @@ const SLOT_MOTIVO_DER     = 11;
 const SLOT_MOTIVO_INF     = 12;
 const SLOT_MOTIVO_IZQ     = 13;
 
-// --- INTENSIDAD ---
+// INTENSIDAD
 let intensidad = 0.0;
 const PASO_INTENSIDAD = 0.05;
 const GROSOR_BORDE_MIN = 12.0;
@@ -49,7 +43,7 @@ const FACTOR_BR_MAX  = 1.10;
 const MOTIVO_LADO_MIN = 70;
 const MOTIVO_LADO_MAX = 110;
 
-// --- MUTACIÓN ---
+// MUTACIÓN
 const NUM_FORMAS = 10;
 const F_ZIGZAG = 0, F_ONDA = 1, F_CUARTO_CIRCULO = 2, F_BARRA_AMARILLA = 3,
       F_RECT_AZUL = 4, F_TRIANGULO = 5, F_ARCADA = 6, F_CUADRADO_ROJO = 7,
@@ -209,7 +203,7 @@ function aplicarFlash(idxForma, x, y, w, h) {
 }
 
 // ============================================================
-// 1. ZIGZAG
+// ZIGZAG
 // ============================================================
 function dibujarFormaZigzag() {
   const v = variantes[F_ZIGZAG];
@@ -254,7 +248,7 @@ function dibujarFormaZigzag() {
 }
 
 // ============================================================
-// 2. ONDA
+// ONDA
 // ============================================================
 function dibujarFormaOnda() {
   const v = variantes[F_ONDA];
@@ -306,7 +300,7 @@ function dibujarFormaOnda() {
 }
 
 // ============================================================
-// 3. CUARTO DE CÍRCULO
+// CUARTO DE CÍRCULO
 // ============================================================
 function dibujarCuartoCirculoRosa() {
   const v = variantes[F_CUARTO_CIRCULO];
@@ -328,7 +322,7 @@ function dibujarCuartoCirculoRosa() {
 }
 
 // ============================================================
-// 4. BARRA AMARILLA
+// BARRA AMARILLA
 // ============================================================
 function dibujarBarraAmarilla() {
   const v = variantes[F_BARRA_AMARILLA];
@@ -346,7 +340,7 @@ function dibujarBarraAmarilla() {
 }
 
 // ============================================================
-// 5. RECT AZUL
+// RECT AZUL
 // ============================================================
 function dibujarRectanguloAzul() {
   const v = variantes[F_RECT_AZUL];
@@ -364,7 +358,7 @@ function dibujarRectanguloAzul() {
 }
 
 // ============================================================
-// 6. TRIÁNGULO CELESTE
+// TRIÁNGULO CELESTE
 // ============================================================
 function dibujarTrianguloCeleste() {
   const v = variantes[F_TRIANGULO];
@@ -382,7 +376,7 @@ function dibujarTrianguloCeleste() {
 }
 
 // ============================================================
-// 7. ARCADA LAVANDA
+// ARCADA LAVANDA
 // ============================================================
 function dibujarArcadaLavanda() {
   const v = variantes[F_ARCADA];
@@ -414,7 +408,7 @@ function dibujarArcadaLavanda() {
 }
 
 // ============================================================
-// 8. CUADRADO ROJO
+// CUADRADO ROJO
 // ============================================================
 function dibujarCuadradoRojo() {
   const v = variantes[F_CUADRADO_ROJO];
@@ -441,7 +435,7 @@ function dibujarCuadradoRojo() {
 }
 
 // ============================================================
-// 9. PÍLDORA VERDE
+// COSO FORMA PÍLDORA VERDE
 // ============================================================
 function dibujarPildoraVerde() {
   const v = variantes[F_PILDORA];
@@ -459,7 +453,7 @@ function dibujarPildoraVerde() {
 }
 
 // ============================================================
-// 10. MOTIVO 4 TRIÁNGULOS
+// MOTIVO 4 TRIÁNGULOS
 // ============================================================
 function dibujarMotivo() {
   const v = variantes[F_MOTIVO];
