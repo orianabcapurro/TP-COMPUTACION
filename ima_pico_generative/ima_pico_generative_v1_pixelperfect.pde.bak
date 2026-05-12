@@ -1,12 +1,3 @@
-// ============================================================
-// IMA PICO GENERATIVE — Réplica pixel-perfect
-// Processing Java Mode — TP Computación
-// ============================================================
-// Versión estática (sin aleatorización) que replica la pintura
-// de referencia. Todas las coordenadas están en un grid virtual
-// de 500×500 y se escalan al tamaño real del lienzo.
-// ============================================================
-
 final int LADO = 600;
 final int MARCO = 22;          // marco blanco exterior
 final float GRID = 500.0;      // grid virtual de referencia
